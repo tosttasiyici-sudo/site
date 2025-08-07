@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Okulların Açılmasına Geri Sayım</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+            cursor: none;
+            padding-bottom: 120px;
+        }
+        
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #FFD700, #FFA500);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+        
+        .cursor-trail {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 215, 0, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+        }
+        
+        .cursor-plus {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 9997;
+            color: rgba(255, 215, 0, 0.6);
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        .title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+        }
+        
+        .countdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .time-unit {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .time-unit:hover {
+            transform: translateY(-5px);
+        }
+        
+        .time-number {
+            font-size: 3rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .time-label {
+            font-size: 1rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+        
+        .school-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .message {
+            font-size: 1.1rem;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .close:hover {
+            opacity: 0.7;
+        }
+        
+        .modal h2 {
+            margin-bottom: 1rem;
+            color: white;
+        }
+        
+        .modal p {
+            margin-bottom: 1rem;
+            color: white;
+            opacity: 0.9;
+        }
+        
+        .chat-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 2% auto;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 600px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            backdrop-filter: blur(10px);
+        }
+        
+        .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .chat-send {
+            background: #FFD700;
+            color: #333;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-send:hover {
+            background: #FFC107;
+            transform: translateY(-2px);
+        }
+        
+        .chat-message {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .chat-username {
+            font-weight: 600;
+            color: #FFD700;
+        }
+        
+        .name-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .name-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .modal-btn {
+            background: #FFD700;
+            color: #333;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .modal-btn:hover {
+            background: #FFC107;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .countdown {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .time-unit {
+                padding: 1.5rem 0.5rem;
+            }
+            
+            .time-number {
+                font-size: 2rem;
+            }
+            
+            .modal-content, .chat-container {
+                width: 95%;
+                margin: 2% auto;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .countdown {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor" id="cursor"></div>
+    <div class="floating-particles" id="particles"></div>
+    <div class="cursor-plus" id="plus1">+</div>
+    <div class="cursor-plus" id="plus2">+</div>
+    <div class="cursor-plus" id="plus3">+</div>
+    <div class="cursor-plus" id="plus4">+</div>
+    <div class="cursor-plus" id="plus5">+</div>
+    
+    <div class="header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div style="font-size: 2rem;">📚</div>
+            <div>
+                <div style="font-weight: 700; font-size: 1.3rem; line-height: 1;">EduTimer</div>
+                <div style="font-size: 0.8rem; opacity: 0.8;">Eğitim Geri Sayım</div>
+            </div>
+        </div>
+        <div class="header-buttons">
+            <button class="header-btn" onclick="openContact()">📧 Bize Ulaşın</button>
+            <button class="header-btn" onclick="openChat()">💬 Sohbet</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="school-icon">🎒</div>
+        <h1 class="title">Okulların Açılmasına</h1>
+        <p class="subtitle">Yeni eğitim yılı başlıyor!</p>
+        
+        <div class="countdown" id="countdown">
+            <div class="time-unit">
+                <span class="time-number" id="days">0</span>
+                <span class="time-label">Gün</span>
+            </div>
+            <div class="time-unit">
+                <span class="time-number" id="hours">0</span>
+                <span class="time-label">Saat</span>
+            </div>
+            <div class="time-unit">
+                <span class="time-number" id="minutes">0</span>
+                <span class="time-label">Dakika</span>
+            </div>
+            <div class="time-unit">
+                <span class="time-number" id="seconds">0</span>
+                <span class="time-label">Saniye</span>
+            </div>
+        </div>
+        
+        <div class="message" id="message">
+            Hazırlıklar devam ediyor... 📚✏️
+        </div>
+    </div>
+
+    <footer style="position: fixed; bottom: 0; left: 0; right: 0; text-align: center; padding: 1rem 2rem; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-top: 1px solid rgba(255, 255, 255, 0.2); z-index: 100;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span>🎯</span>
+                <span>Hedefine Odaklan</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span>📖</span>
+                <span>Öğrenmeye Devam Et</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span>🚀</span>
+                <span>Başarıya Ulaş</span>
+            </div>
+        </div>
+        <div style="opacity: 0.8; font-size: 0.9rem;">
+            © 2025 EduTimer - Eğitim yolculuğunda yanınızdayız
+        </div>
+    </footer>
+
+    <!-- İletişim Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeContact()">&times;</span>
+            <h2>📧 Bize Ulaşın</h2>
+            <p>Sorularınız ve önerileriniz için bizimle iletişime geçebilirsiniz:</p>
+            <p style="font-size: 1.2rem; font-weight: 600; color: #FFD700;">
+                📧 kaanacar1169@icloud.com
+            </p>
+            <p>Size en kısa sürede dönüş yapacağız! 😊</p>
+        </div>
+    </div>
+
+    <!-- İsim Girme Modal -->
+    <div id="nameModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeName()">&times;</span>
+            <h2>💬 Sohbete Katıl</h2>
+            <p>Sohbette kullanmak istediğiniz isim?</p>
+            <input type="text" id="usernameInput" class="name-input" placeholder="İsminizi girin..." maxlength="20">
+            <button class="modal-btn" onclick="joinChat()">Sohbete Katıl</button>
+        </div>
+    </div>
+
+    <!-- Sohbet Modal -->
+    <div id="chatModal" class="modal">
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>💬 Sohbet Odası</h2>
+                <span class="close" onclick="closeChat()">&times;</span>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message">
+                    <span class="chat-username">Sistem:</span> Sohbet odasına hoş geldiniz! 🎉
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" id="messageInput" class="chat-input" placeholder="Mesajınızı yazın..." maxlength="200">
+                <button class="chat-send" onclick="sendMessage()">Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hedef tarih: 8 Eylül (bu yıl veya gelecek yıl), 09:00
+        function getTargetDate() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            let targetDate = new Date(`${currentYear}-09-08T09:00:00`);
+            
+            // Eğer bu yılın 8 Eylül tarihi geçmişse, gelecek yılı kullan
+            if (targetDate.getTime() < now.getTime()) {
+                targetDate = new Date(`${currentYear + 1}-09-08T09:00:00`);
+            }
+            
+            return targetDate.getTime();
+        }
+        
+        const targetDate = getTargetDate();
+        
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            
+            // Zaman hesaplamaları
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            // Sayıları güncelle
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+            
+            // Mesajı güncelle
+            let message = '';
+            if (days > 7) {
+                message = 'Henüz biraz zaman var, hazırlıklara devam! 📖';
+            } else if (days > 3) {
+                message = 'Son hafta! Okul malzemelerini hazırla 🎒';
+            } else if (days > 1) {
+                message = 'Çok yaklaştık! Heyecan dorukta! 🚀';
+            } else if (days === 1) {
+                message = 'Sadece 1 gün kaldı! Yarın okul başlıyor! 🎉';
+            } else {
+                message = 'Bugün okul başlıyor! Son hazırlıklar... ⏰';
+            }
+            
+            document.getElementById('message').innerHTML = message;
+        }
+        
+        // Sayacı başlat ve her saniye güncelle
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // Modal fonksiyonları
+        function openContact() {
+            document.getElementById('contactModal').style.display = 'block';
+        }
+
+        function closeContact() {
+            document.getElementById('contactModal').style.display = 'none';
+        }
+
+        function openChat() {
+            document.getElementById('nameModal').style.display = 'block';
+        }
+
+        function closeName() {
+            document.getElementById('nameModal').style.display = 'none';
+        }
+
+        function closeChat() {
+            document.getElementById('chatModal').style.display = 'none';
+        }
+
+        // Sohbet değişkenleri
+        let username = '';
+        let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+
+        function joinChat() {
+            const usernameInput = document.getElementById('usernameInput');
+            const enteredName = usernameInput.value.trim();
+            
+            if (enteredName === '') {
+                alert('Lütfen bir isim girin!');
+                return;
+            }
+            
+            username = enteredName;
+            document.getElementById('nameModal').style.display = 'none';
+            document.getElementById('chatModal').style.display = 'block';
+            
+            // Katılım mesajı ekle
+            addMessage('Sistem', `${username} sohbete katıldı! 👋`);
+            loadMessages();
+            usernameInput.value = '';
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (message === '') return;
+            
+            addMessage(username, message);
+            messageInput.value = '';
+            loadMessages();
+        }
+
+        function addMessage(user, text) {
+            const timestamp = new Date().getTime();
+            const messageObj = {
+                username: user,
+                text: text,
+                timestamp: timestamp
+            };
+            
+            messages.push(messageObj);
+            
+            // Son 50 mesajı tut
+            if (messages.length > 50) {
+                messages = messages.slice(-50);
+            }
+            
+            localStorage.setItem('chatMessages', JSON.stringify(messages));
+        }
+
+        function loadMessages() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'chat-message';
+                messageDiv.innerHTML = `<span class="chat-username">${msg.username}:</span> ${msg.text}`;
+                chatMessages.appendChild(messageDiv);
+            });
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Enter tuşu ile mesaj gönderme
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        document.getElementById('usernameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                joinChat();
+            }
+        });
+
+        // Modal dışına tıklayınca kapatma
+        window.onclick = function(event) {
+            const contactModal = document.getElementById('contactModal');
+            const nameModal = document.getElementById('nameModal');
+            const chatModal = document.getElementById('chatModal');
+            
+            if (event.target === contactModal) {
+                contactModal.style.display = 'none';
+            }
+            if (event.target === nameModal) {
+                nameModal.style.display = 'none';
+            }
+            if (event.target === chatModal) {
+                chatModal.style.display = 'none';
+            }
+        }
+
+        // Mesajları periyodik olarak yenile (diğer kullanıcıların mesajlarını görmek için)
+        setInterval(() => {
+            if (document.getElementById('chatModal').style.display === 'block') {
+                const savedMessages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+                if (savedMessages.length !== messages.length) {
+                    messages = savedMessages;
+                    loadMessages();
+                }
+            }
+        }, 2000);
+
+        // Mouse takip efekti
+        const cursor = document.getElementById('cursor');
+        const trails = [];
+        const trailLength = 8;
+        const plusElements = [
+            document.getElementById('plus1'),
+            document.getElementById('plus2'),
+            document.getElementById('plus3'),
+            document.getElementById('plus4'),
+            document.getElementById('plus5')
+        ];
+
+        // Trail elementlerini oluştur
+        for (let i = 0; i < trailLength; i++) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            document.body.appendChild(trail);
+            trails.push({
+                element: trail,
+                x: 0,
+                y: 0
+            });
+        }
+
+        // Plus elementleri için pozisyon dizisi
+        const plusPositions = plusElements.map(() => ({ x: 0, y: 0 }));
+
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            cursor.style.left = mouseX - 10 + 'px';
+            cursor.style.top = mouseY - 10 + 'px';
+        });
+
+        // Trail ve plus animasyonu
+        function updateTrails() {
+            trails.forEach((trail, index) => {
+                const delay = index * 2;
+                trail.x += (mouseX - trail.x) * (0.3 - index * 0.02);
+                trail.y += (mouseY - trail.y) * (0.3 - index * 0.02);
+                
+                trail.element.style.left = trail.x - 3 + 'px';
+                trail.element.style.top = trail.y - 3 + 'px';
+                trail.element.style.opacity = (1 - index / trailLength) * 0.6;
+                trail.element.style.transform = `scale(${1 - index * 0.1})`;
+            });
+
+            // Plus elementlerini güncelle
+            plusElements.forEach((plus, index) => {
+                const speed = 0.15 - index * 0.02;
+                const distance = 40 + index * 15;
+                const angle = (Date.now() * 0.001 + index * Math.PI * 0.4) % (Math.PI * 2);
+                
+                plusPositions[index].x += (mouseX + Math.cos(angle) * distance - plusPositions[index].x) * speed;
+                plusPositions[index].y += (mouseY + Math.sin(angle) * distance - plusPositions[index].y) * speed;
+                
+                plus.style.left = plusPositions[index].x - 10 + 'px';
+                plus.style.top = plusPositions[index].y - 10 + 'px';
+                plus.style.opacity = (1 - index * 0.15) * 0.8;
+                plus.style.transform = `scale(${1 - index * 0.1}) rotate(${angle * 180 / Math.PI}deg)`;
+            });
+            
+            requestAnimationFrame(updateTrails);
+        }
+
+        updateTrails();
+
+        // Hover efektleri
+        document.querySelectorAll('button, .time-unit, .header-btn').forEach(element => {
+            element.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'scale(1.5)';
+                cursor.style.background = 'radial-gradient(circle, #FF6B6B, #FF8E53)';
+            });
+            
+            element.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'scale(1)';
+                cursor.style.background = 'radial-gradient(circle, #FFD700, #FFA500)';
+            });
+        });
+
+        // Floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            const size = Math.random() * 6 + 2;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            particle.style.animationDelay = Math.random() * 5 + 's';
+            
+            document.getElementById('particles').appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 20000);
+        }
+
+        // Sürekli parçacık oluştur
+        setInterval(createParticle, 800);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96b77246330019a2',t:'MTc1NDU3Njc1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
