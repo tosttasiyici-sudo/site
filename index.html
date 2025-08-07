@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Okulların Açılmasına Geri Sayım</title>
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
         
@@ -418,21 +417,6 @@
         }
     </style>
 </head>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EduTimer</title>
-
-  <!-- Firebase SDK'ları -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
-  <!-- İstersen buraya kendi CSS dosyanı ekleyebilirsin -->
-  <!-- <link rel="stylesheet" href="style.css" /> -->
-</head>
 <body>
     <div class="cursor" id="cursor"></div>
     <div class="floating-particles" id="particles"></div>
@@ -452,7 +436,10 @@
         </div>
         <div class="header-buttons">
             <button class="header-btn" onclick="openContact()">📧 Bize Ulaşın</button>
-            <button class="header-btn" onclick="openChat()">💬 Çalışmalarım</button>
+            <button class="header-btn" onclick="openCalculator()">🧮 Hesap Makinesi</button>
+            <button class="header-btn" onclick="openWhiteboard()">🎨 Akıllı Tahta</button>
+            <button class="header-btn" onclick="openStudyPlan()">📚 Çalışma Planım</button>
+            <button class="header-btn" onclick="openAdmin()">👑 Admin</button>
         </div>
     </div>
 
@@ -483,6 +470,12 @@
         <div class="message" id="message">
             Hazırlıklar devam ediyor... 📚✏️
         </div>
+        
+        <!-- Reklam Alanı -->
+        <div id="adContainer" style="display: none; margin-top: 2rem; padding: 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 15px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
+            <div style="text-align: center; margin-bottom: 0.5rem; font-size: 0.8rem; opacity: 0.7;">Reklam</div>
+            <img id="adImage" src="" alt="Reklam" style="width: 100%; max-width: 400px; height: auto; border-radius: 10px; cursor: pointer; transition: transform 0.3s ease;" onclick="openAdLink()">
+        </div>
     </div>
 
     <footer style="position: fixed; bottom: 0; left: 0; right: 0; text-align: center; padding: 1rem 2rem; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-top: 1px solid rgba(255, 255, 255, 0.2); z-index: 100;">
@@ -501,7 +494,7 @@
             </div>
         </div>
         <div style="opacity: 0.8; font-size: 0.9rem;">
-            © 2025 EduTimer - Eğitim yolculuğunda yanınızdayız
+            © 2024 EduTimer - Eğitim yolculuğunda yanınızdayız
         </div>
     </footer>
 
@@ -518,37 +511,138 @@
         </div>
     </div>
 
-    <!-- İsim Girme Modal -->
-    <div id="nameModal" class="modal">
+    <!-- Admin Şifre Modal -->
+    <div id="adminPasswordModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeName()">&times;</span>
-            <h2>💬 Çalışmaya Katıl</h2>
-            <p>Çalışırken kullanmak istediğiniz isim?</p>
-            <input type="text" id="usernameInput" class="name-input" placeholder="İsminizi girin..." maxlength="20">
-            <button class="modal-btn" onclick="joinChat()">Çalışmaya Katıl</button>
+            <span class="close" onclick="closeAdminPassword()">&times;</span>
+            <h2>👑 Admin Girişi</h2>
+            <p>Admin paneline erişmek için şifreyi girin:</p>
+            <input type="password" id="adminPasswordInput" class="name-input" placeholder="Şifre..." maxlength="20">
+            <button class="modal-btn" onclick="checkAdminPassword()">Giriş Yap</button>
         </div>
     </div>
 
-    <!-- Sohbet Modal -->
-    <div id="chatModal" class="modal">
+    <!-- Çalışma Planı Modal -->
+    <div id="studyPlanModal" class="modal">
         <div class="chat-container">
             <div class="chat-header">
-                <h2>💬 Çalışma Odası</h2>
-                <span class="close" onclick="closeChat()">&times;</span>
+                <h2>📚 Çalışma Planım</h2>
+                <span class="close" onclick="closeStudyPlan()">&times;</span>
             </div>
-            <div class="chat-messages" id="chatMessages">
-                <div class="chat-message">
-                    <span class="chat-username">Sistem:</span> Çalışma odasına hoş geldiniz! 🎉
+            <div class="chat-messages" id="studyPlanContent">
+                <div style="margin-bottom: 1rem;">
+                    <h3 style="color: #FFD700; margin-bottom: 0.5rem;">📅 Günlük Plan</h3>
+                    <div id="dailyTasks" style="margin-bottom: 1rem;"></div>
+                    <input type="text" id="dailyTaskInput" class="chat-input" placeholder="Günlük görev ekle..." style="margin-bottom: 0.5rem;">
+                    <button class="chat-send" onclick="addDailyTask()">Ekle</button>
                 </div>
-            </div>
-            <div class="chat-input-container">
-                <input type="text" id="messageInput" class="chat-input" placeholder="Mesajınızı yazın..." maxlength="200">
-                <button class="chat-send" onclick="sendMessage()">Gönder</button>
             </div>
         </div>
     </div>
 
-    <!-- Senin inline scriptlerin -->
+    <!-- Hesap Makinesi Modal -->
+    <div id="calculatorModal" class="modal">
+        <div class="modal-content" style="max-width: 350px;">
+            <span class="close" onclick="closeCalculator()">&times;</span>
+            <h2>🧮 Hesap Makinesi</h2>
+            <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 15px; margin-bottom: 1rem;">
+                <input type="text" id="calculatorDisplay" readonly style="width: 100%; padding: 1rem; font-size: 1.5rem; text-align: right; background: rgba(0,0,0,0.3); color: white; border: none; border-radius: 10px; margin-bottom: 1rem;" value="0">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+                    <button onclick="clearCalculator()" style="background: #FF6B6B; color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">C</button>
+                    <button onclick="deleteLast()" style="background: #FFA500; color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">⌫</button>
+                    <button onclick="calcButton('/')" style="background: #667eea; color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">÷</button>
+                    <button onclick="calcButton('*')" style="background: #667eea; color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">×</button>
+                    
+                    <button onclick="calcButton('7')" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">7</button>
+                    <button onclick="calcButton('8')" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">8</button>
+                    <button onclick="calcButton('9')" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">9</button>
+                    <button onclick="calcButton('-')" style="background: #667eea; color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">-</button>
+                    
+                    <button onclick="calcButton('4')" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">4</button>
+                    <button onclick="calcButton('5')" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">5</button>
+                    <button onclick="calcButton('6')" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">6</button>
+                    <button onclick="calcButton('+')" style="background: #667eea; color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">+</button>
+                    
+                    <button onclick="calcButton('1')" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">1</button>
+                    <button onclick="calcButton('2')" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">2</button>
+                    <button onclick="calcButton('3')" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">3</button>
+                    <button onclick="calculateResult()" style="background: #FFD700; color: #333; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold; grid-row: span 2;">=</button>
+                    
+                    <button onclick="calcButton('0')" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold; grid-column: span 2;">0</button>
+                    <button onclick="calcButton('.')" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold;">.</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Akıllı Tahta Modal -->
+    <div id="whiteboardModal" class="modal">
+        <div class="modal-content" style="max-width: 90%; max-height: 90%; width: 800px; height: 600px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>🎨 Akıllı Tahta</h2>
+                <span class="close" onclick="closeWhiteboard()">&times;</span>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                <button onclick="setDrawingTool('pen')" id="penTool" style="background: #FFD700; color: #333; border: none; padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer; font-weight: bold;">✏️ Kalem</button>
+                <button onclick="setDrawingTool('eraser')" id="eraserTool" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer; font-weight: bold;">🧽 Silgi</button>
+                <div style="position: relative; display: inline-block;">
+                    <div id="colorDisplay" style="width: 50px; height: 40px; background: #FFD700; border: 3px solid rgba(255,255,255,0.3); border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); transition: all 0.3s ease; position: relative; overflow: hidden;" onclick="document.getElementById('colorPicker').click();">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255,255,255,0.8); font-size: 18px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🎨</div>
+                    </div>
+                    <input type="color" id="colorPicker" value="#FFD700" onchange="changeColor()" style="position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;">
+                </div>
+                <input type="range" id="brushSize" min="1" max="20" value="3" onchange="changeBrushSize()" style="width: 100px;">
+            </div>
+            <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
+                <canvas id="whiteboardCanvas" width="750" height="400" style="background: white; border-radius: 10px; cursor: crosshair; border: 2px solid rgba(255,255,255,0.3); display: block; margin: 0 auto;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="modal">
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>👑 Admin Panel</h2>
+                <span class="close" onclick="closeAdmin()">&times;</span>
+            </div>
+            <div class="chat-messages" id="adminContent">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h3 style="color: #FFD700; margin-bottom: 1rem;">📊 Site İstatistikleri</h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 10px;">
+                            <div style="font-size: 2rem; color: #FFD700; font-weight: bold;" id="dailyViews">0</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Günlük Ziyaret</div>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 10px;">
+                            <div style="font-size: 2rem; color: #FFD700; font-weight: bold;" id="monthlyViews">0</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Aylık Ziyaret</div>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 10px;">
+                            <div style="font-size: 2rem; color: #FFD700; font-weight: bold;" id="yearlyViews">0</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Yıllık Ziyaret</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                        <h4 style="color: #FFD700; margin-bottom: 0.5rem;">📈 Son Ziyaretler</h4>
+                        <div id="recentVisits" style="font-size: 0.9rem; opacity: 0.8;"></div>
+                    </div>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                        <h4 style="color: #FFD700; margin-bottom: 0.5rem;">📢 Reklam Yönetimi</h4>
+                        <input type="file" id="adImageInput" accept="image/*" style="margin-bottom: 0.5rem; color: white; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; padding: 0.5rem; width: 100%;">
+                        <button class="modal-btn" onclick="uploadAd()" style="background: #4CAF50; margin-bottom: 0.5rem;">📤 Reklam Yükle</button>
+                        <button class="modal-btn" onclick="removeAd()" style="background: #FF6B6B;">🗑️ Reklamı Kaldır</button>
+                    </div>
+                    
+                    <button class="modal-btn" onclick="resetStats()" style="background: #FF6B6B; margin-top: 1rem;">🗑️ İstatistikleri Sıfırla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Hedef tarih: 8 Eylül (bu yıl veya gelecek yıl), 09:00
         function getTargetDate() {
@@ -612,126 +706,498 @@
             document.getElementById('contactModal').style.display = 'none';
         }
 
-        function openChat() {
-            document.getElementById('nameModal').style.display = 'block';
+        function openStudyPlan() {
+            document.getElementById('studyPlanModal').style.display = 'block';
+            loadStudyPlan();
         }
 
-        function closeName() {
-            document.getElementById('nameModal').style.display = 'none';
+        function closeStudyPlan() {
+            document.getElementById('studyPlanModal').style.display = 'none';
         }
 
-        function closeChat() {
-            document.getElementById('chatModal').style.display = 'none';
+        function openAdmin() {
+            document.getElementById('adminPasswordModal').style.display = 'block';
         }
 
-        // Sohbet değişkenleri
-        let username = '';
-        let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
-
-        function joinChat() {
-            const usernameInput = document.getElementById('usernameInput');
-            const enteredName = usernameInput.value.trim();
-            
-            if (enteredName === '') {
-                alert('Lütfen bir isim girin!');
-                return;
-            }
-            
-            username = enteredName;
-            document.getElementById('nameModal').style.display = 'none';
-            document.getElementById('chatModal').style.display = 'block';
-            
-            // Katılım mesajı ekle
-            addMessage('Sistem', `${username} Çalışmaya katıldı! 👋`);
-            loadMessages();
-            usernameInput.value = '';
+        function closeAdminPassword() {
+            document.getElementById('adminPasswordModal').style.display = 'none';
         }
 
-        function sendMessage() {
-            const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value.trim();
-            
-            if (message === '') return;
-            
-            addMessage(username, message);
-            messageInput.value = '';
-            loadMessages();
+        function closeAdmin() {
+            document.getElementById('adminModal').style.display = 'none';
         }
 
-        function addMessage(user, text) {
-            const timestamp = new Date().getTime();
-            const messageObj = {
-                username: user,
-                text: text,
-                timestamp: timestamp
-            };
-            
-            messages.push(messageObj);
-            
-            // Son 50 mesajı tut
-            if (messages.length > 50) {
-                messages = messages.slice(-50);
-            }
-            
-            localStorage.setItem('chatMessages', JSON.stringify(messages));
+        function openCalculator() {
+            document.getElementById('calculatorModal').style.display = 'block';
+            document.getElementById('calculatorDisplay').value = '0';
         }
 
-        function loadMessages() {
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML = '';
+        function closeCalculator() {
+            document.getElementById('calculatorModal').style.display = 'none';
+        }
+
+        function openWhiteboard() {
+            document.getElementById('whiteboardModal').style.display = 'block';
+            initWhiteboard();
+        }
+
+        function closeWhiteboard() {
+            document.getElementById('whiteboardModal').style.display = 'none';
+        }
+
+        // Çalışma planı değişkenleri
+        let dailyTasks = JSON.parse(localStorage.getItem('dailyTasks')) || [];
+
+        function addDailyTask() {
+            const taskInput = document.getElementById('dailyTaskInput');
+            const task = taskInput.value.trim();
             
-            messages.forEach(msg => {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'chat-message';
-                messageDiv.innerHTML = `<span class="chat-username">${msg.username}:</span> ${msg.text}`;
-                chatMessages.appendChild(messageDiv);
+            if (task === '') return;
+            
+            dailyTasks.push({
+                text: task,
+                completed: false,
+                date: new Date().toDateString()
             });
             
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            localStorage.setItem('dailyTasks', JSON.stringify(dailyTasks));
+            taskInput.value = '';
+            loadStudyPlan();
         }
 
-        // Enter tuşu ile mesaj gönderme
-        document.getElementById('messageInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
+        function loadStudyPlan() {
+            const dailyTasksDiv = document.getElementById('dailyTasks');
+            
+            dailyTasksDiv.innerHTML = '';
+            
+            dailyTasks.forEach((task, index) => {
+                const taskDiv = document.createElement('div');
+                taskDiv.className = 'chat-message';
+                taskDiv.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${index})" style="margin-right: 0.5rem;">
+                    <span style="${task.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${task.text}</span>
+                    <button onclick="removeTask(${index})" style="float: right; background: #FF6B6B; border: none; color: white; padding: 0.2rem 0.5rem; border-radius: 5px; cursor: pointer;">🗑️</button>
+                `;
+                dailyTasksDiv.appendChild(taskDiv);
+            });
+        }
 
-        document.getElementById('usernameInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                joinChat();
+        function toggleTask(index) {
+            dailyTasks[index].completed = !dailyTasks[index].completed;
+            localStorage.setItem('dailyTasks', JSON.stringify(dailyTasks));
+            loadStudyPlan();
+        }
+
+        function removeTask(index) {
+            dailyTasks.splice(index, 1);
+            localStorage.setItem('dailyTasks', JSON.stringify(dailyTasks));
+            loadStudyPlan();
+        }
+
+        // Admin fonksiyonları
+        function checkAdminPassword() {
+            const passwordInput = document.getElementById('adminPasswordInput');
+            const password = passwordInput.value;
+            
+            if (password === 'Kk1408Kk') {
+                document.getElementById('adminPasswordModal').style.display = 'none';
+                document.getElementById('adminModal').style.display = 'block';
+                loadAdminStats();
+                passwordInput.value = '';
+            } else {
+                alert('Yanlış şifre!');
+                passwordInput.value = '';
             }
+        }
+
+        function loadAdminStats() {
+            const stats = JSON.parse(localStorage.getItem('siteStats')) || {
+                daily: 0,
+                monthly: 0,
+                yearly: 0,
+                visits: [],
+                lastReset: new Date().toDateString()
+            };
+            
+            document.getElementById('dailyViews').textContent = stats.daily;
+            document.getElementById('monthlyViews').textContent = stats.monthly;
+            document.getElementById('yearlyViews').textContent = stats.yearly;
+            
+            const recentVisitsDiv = document.getElementById('recentVisits');
+            recentVisitsDiv.innerHTML = '';
+            
+            stats.visits.slice(-10).reverse().forEach(visit => {
+                const visitDiv = document.createElement('div');
+                visitDiv.innerHTML = `${visit.date} - ${visit.time}`;
+                recentVisitsDiv.appendChild(visitDiv);
+            });
+        }
+
+        function resetStats() {
+            if (confirm('Tüm istatistikleri sıfırlamak istediğinizden emin misiniz?')) {
+                const resetData = {
+                    daily: 0,
+                    monthly: 0,
+                    yearly: 0,
+                    visits: [],
+                    lastReset: new Date().toDateString()
+                };
+                localStorage.setItem('siteStats', JSON.stringify(resetData));
+                loadAdminStats();
+                alert('İstatistikler sıfırlandı!');
+            }
+        }
+
+        // Sayfa yüklendiğinde ziyaret sayısını artır
+        function trackVisit() {
+            const stats = JSON.parse(localStorage.getItem('siteStats')) || {
+                daily: 0,
+                monthly: 0,
+                yearly: 0,
+                visits: [],
+                lastReset: new Date().toDateString()
+            };
+            
+            const now = new Date();
+            const today = now.toDateString();
+            
+            // Günlük sıfırlama kontrolü
+            if (stats.lastReset !== today) {
+                stats.daily = 0;
+                stats.lastReset = today;
+            }
+            
+            stats.daily++;
+            stats.monthly++;
+            stats.yearly++;
+            
+            stats.visits.push({
+                date: today,
+                time: now.toLocaleTimeString()
+            });
+            
+            // Son 100 ziyareti tut
+            if (stats.visits.length > 100) {
+                stats.visits = stats.visits.slice(-100);
+            }
+            
+            localStorage.setItem('siteStats', JSON.stringify(stats));
+        }
+
+        // Sayfa yüklendiğinde ziyareti kaydet
+        trackVisit();
+
+        // Hesap makinesi fonksiyonları
+        let currentInput = '0';
+        let operator = '';
+        let previousInput = '';
+        let shouldResetDisplay = false;
+
+        function calcButton(value) {
+            const display = document.getElementById('calculatorDisplay');
+            
+            if (shouldResetDisplay) {
+                currentInput = '0';
+                shouldResetDisplay = false;
+            }
+            
+            if (['+', '-', '*', '/'].includes(value)) {
+                if (previousInput !== '' && operator !== '' && !shouldResetDisplay) {
+                    calculateResult();
+                }
+                operator = value;
+                previousInput = currentInput;
+                shouldResetDisplay = true;
+            } else {
+                if (currentInput === '0' && value !== '.') {
+                    currentInput = value;
+                } else {
+                    currentInput += value;
+                }
+            }
+            
+            display.value = currentInput;
+        }
+
+        function clearCalculator() {
+            currentInput = '0';
+            operator = '';
+            previousInput = '';
+            shouldResetDisplay = false;
+            document.getElementById('calculatorDisplay').value = '0';
+        }
+
+        function deleteLast() {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
+            }
+            document.getElementById('calculatorDisplay').value = currentInput;
+        }
+
+        function calculateResult() {
+            const display = document.getElementById('calculatorDisplay');
+            
+            if (previousInput === '' || operator === '') return;
+            
+            try {
+                const prev = parseFloat(previousInput);
+                const current = parseFloat(currentInput);
+                let result;
+                
+                switch (operator) {
+                    case '+':
+                        result = prev + current;
+                        break;
+                    case '-':
+                        result = prev - current;
+                        break;
+                    case '*':
+                        result = prev * current;
+                        break;
+                    case '/':
+                        if (current === 0) {
+                            throw new Error('Sıfıra bölme hatası');
+                        }
+                        result = prev / current;
+                        break;
+                    default:
+                        return;
+                }
+                
+                currentInput = result.toString();
+                operator = '';
+                previousInput = '';
+                shouldResetDisplay = true;
+                display.value = currentInput;
+                
+            } catch (error) {
+                display.value = 'Hata';
+                setTimeout(() => {
+                    clearCalculator();
+                }, 1500);
+            }
+        }
+
+        // Akıllı tahta fonksiyonları
+        let canvas, ctx;
+        let isDrawing = false;
+        let currentTool = 'pen';
+        let currentColor = '#FFD700';
+        let currentSize = 3;
+
+        function initWhiteboard() {
+            canvas = document.getElementById('whiteboardCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Canvas'ı beyaz arka planla başlat
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Canvas event listeners
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile
+            canvas.addEventListener('touchstart', handleTouch);
+            canvas.addEventListener('touchmove', handleTouch);
+            canvas.addEventListener('touchend', stopDrawing);
+            
+            // Set initial drawing settings
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = currentSize;
+            ctx.strokeStyle = currentColor;
+            
+            // Tool butonlarını başlangıç durumuna getir
+            setDrawingTool('pen');
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (currentTool === 'pen') {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = currentColor;
+            } else if (currentTool === 'eraser') {
+                ctx.globalCompositeOperation = 'destination-out';
+            }
+            
+            ctx.lineWidth = currentSize;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                            e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        function setDrawingTool(tool) {
+            currentTool = tool;
+            
+            // Update button styles
+            document.getElementById('penTool').style.background = tool === 'pen' ? '#FFD700' : 'rgba(255,255,255,0.2)';
+            document.getElementById('penTool').style.color = tool === 'pen' ? '#333' : 'white';
+            document.getElementById('eraserTool').style.background = tool === 'eraser' ? '#FFD700' : 'rgba(255,255,255,0.2)';
+            document.getElementById('eraserTool').style.color = tool === 'eraser' ? '#333' : 'white';
+            
+            // Update cursor
+            canvas.style.cursor = tool === 'pen' ? 'crosshair' : 'grab';
+        }
+
+        function changeColor() {
+            currentColor = document.getElementById('colorPicker').value;
+            const colorDisplay = document.getElementById('colorDisplay');
+            colorDisplay.style.background = currentColor;
+            
+            // Renk değiştiğinde gölge rengini de güncelle
+            const r = parseInt(currentColor.slice(1, 3), 16);
+            const g = parseInt(currentColor.slice(3, 5), 16);
+            const b = parseInt(currentColor.slice(5, 7), 16);
+            colorDisplay.style.boxShadow = `0 4px 15px rgba(${r}, ${g}, ${b}, 0.4)`;
+        }
+
+        function changeBrushSize() {
+            currentSize = document.getElementById('brushSize').value;
+        }
+
+        function clearWhiteboard() {
+            if (confirm('Tüm çizimi silmek istediğinizden emin misiniz?')) {
+                try {
+                    if (canvas && ctx) {
+                        // Canvas'ı tamamen temizle
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        // Beyaz arka plan ekle
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        // Çizim ayarlarını sıfırla
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                        ctx.lineWidth = currentSize;
+                        ctx.strokeStyle = currentColor;
+                        ctx.globalCompositeOperation = 'source-over';
+                        console.log('Canvas temizlendi!');
+                    }
+                } catch (error) {
+                    console.error('Temizleme hatası:', error);
+                    alert('Canvas temizlenirken hata oluştu!');
+                }
+            }
+        }
+
+        function saveDrawing() {
+            try {
+                if (!canvas) {
+                    alert('Canvas bulunamadı!');
+                    return;
+                }
+                
+                // Geçici canvas oluştur
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                
+                // Beyaz arka plan ekle
+                tempCtx.fillStyle = 'white';
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // Mevcut çizimi kopyala
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                // İndirme linkini oluştur
+                const dataURL = tempCanvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = 'akilli-tahta-cizim-' + Date.now() + '.png';
+                link.href = dataURL;
+                
+                // Linki DOM'a ekle, tıkla ve kaldır
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log('Çizim kaydedildi!');
+                
+            } catch (error) {
+                console.error('Kaydetme hatası:', error);
+                alert('Çizim kaydedilirken hata oluştu! Lütfen tekrar deneyin.');
+            }
+        }
+
+        // Enter tuşu ile görev ekleme
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('dailyTaskInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addDailyTask();
+                }
+            });
+
+            document.getElementById('adminPasswordInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAdminPassword();
+                }
+            });
         });
 
         // Modal dışına tıklayınca kapatma
         window.onclick = function(event) {
             const contactModal = document.getElementById('contactModal');
-            const nameModal = document.getElementById('nameModal');
-            const chatModal = document.getElementById('chatModal');
+            const adminPasswordModal = document.getElementById('adminPasswordModal');
+            const studyPlanModal = document.getElementById('studyPlanModal');
+            const adminModal = document.getElementById('adminModal');
+            const calculatorModal = document.getElementById('calculatorModal');
+            const whiteboardModal = document.getElementById('whiteboardModal');
             
             if (event.target === contactModal) {
                 contactModal.style.display = 'none';
             }
-            if (event.target === nameModal) {
-                nameModal.style.display = 'none';
+            if (event.target === adminPasswordModal) {
+                adminPasswordModal.style.display = 'none';
             }
-            if (event.target === chatModal) {
-                chatModal.style.display = 'none';
+            if (event.target === studyPlanModal) {
+                studyPlanModal.style.display = 'none';
+            }
+            if (event.target === adminModal) {
+                adminModal.style.display = 'none';
+            }
+            if (event.target === calculatorModal) {
+                calculatorModal.style.display = 'none';
+            }
+            if (event.target === whiteboardModal) {
+                whiteboardModal.style.display = 'none';
             }
         }
 
 
-
-        // Mesajları periyodik olarak yenile (diğer kullanıcıların mesajlarını görmek için)
-        setInterval(() => {
-            if (document.getElementById('chatModal').style.display === 'block') {
-                const savedMessages = JSON.parse(localStorage.getItem('chatMessages')) || [];
-                if (savedMessages.length !== messages.length) {
-                    messages = savedMessages;
-                    loadMessages();
-                }
-            }
-        }, 2000);
 
         // Mouse takip efekti
         const cursor = document.getElementById('cursor');
@@ -817,6 +1283,22 @@
             });
         });
 
+        // Renk seçici hover efekti
+        document.addEventListener('DOMContentLoaded', function() {
+            const colorDisplay = document.getElementById('colorDisplay');
+            if (colorDisplay) {
+                colorDisplay.addEventListener('mouseenter', () => {
+                    colorDisplay.style.transform = 'scale(1.1)';
+                    colorDisplay.style.borderColor = 'rgba(255,255,255,0.6)';
+                });
+                
+                colorDisplay.addEventListener('mouseleave', () => {
+                    colorDisplay.style.transform = 'scale(1)';
+                    colorDisplay.style.borderColor = 'rgba(255,255,255,0.3)';
+                });
+            }
+        });
+
         // Floating particles
         function createParticle() {
             const particle = document.createElement('div');
@@ -838,10 +1320,89 @@
 
         // Sürekli parçacık oluştur
         setInterval(createParticle, 800);
-    </script>
 
-    <!-- Firebase config dosyası (firebase.js) ve uygulama dosyası (app.js) -->
-    <script src="firebase.js"></script>
-    <script src="app.js"></script>
-</body>
+        // Reklam fonksiyonları
+        function uploadAd() {
+            const fileInput = document.getElementById('adImageInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Lütfen bir resim seçin!');
+                return;
+            }
+            
+            if (!file.type.startsWith('image/')) {
+                alert('Lütfen sadece resim dosyası seçin!');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageData = e.target.result;
+                
+                // Reklam verisini localStorage'a kaydet
+                const adData = {
+                    image: imageData,
+                    uploadDate: new Date().toLocaleString(),
+                    active: true
+                };
+                
+                localStorage.setItem('siteAd', JSON.stringify(adData));
+                
+                // Reklamı göster
+                showAd();
+                
+                alert('Reklam başarıyla yüklendi! 🎉');
+                fileInput.value = '';
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function removeAd() {
+            if (confirm('Reklamı kaldırmak istediğinizden emin misiniz?')) {
+                localStorage.removeItem('siteAd');
+                hideAd();
+                alert('Reklam kaldırıldı!');
+            }
+        }
+
+        function showAd() {
+            const adData = JSON.parse(localStorage.getItem('siteAd'));
+            
+            if (adData && adData.active) {
+                const adContainer = document.getElementById('adContainer');
+                const adImage = document.getElementById('adImage');
+                
+                adImage.src = adData.image;
+                adContainer.style.display = 'block';
+                
+                // Hover efekti ekle
+                adImage.addEventListener('mouseenter', () => {
+                    adImage.style.transform = 'scale(1.02)';
+                });
+                
+                adImage.addEventListener('mouseleave', () => {
+                    adImage.style.transform = 'scale(1)';
+                });
+            }
+        }
+
+        function hideAd() {
+            const adContainer = document.getElementById('adContainer');
+            adContainer.style.display = 'none';
+        }
+
+        function openAdLink() {
+            // Reklama tıklandığında yapılacak işlem
+            // Şimdilik sadece bir mesaj gösterelim
+            alert('Reklam tıklandı! 📢');
+        }
+
+        // Sayfa yüklendiğinde reklamı kontrol et
+        document.addEventListener('DOMContentLoaded', function() {
+            showAd();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96b861e524601a64',t:'MTc1NDU4NjU3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
