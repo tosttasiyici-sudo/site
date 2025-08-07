@@ -451,7 +451,7 @@
         </div>
         <div class="header-buttons">
             <button class="header-btn" onclick="openContact()">📧 Bize Ulaşın</button>
-            <button class="header-btn" onclick="openChat()">💬 Sohbet</button>
+            <button class="header-btn" onclick="openChat()">💬 Çalışmalarım</button>
         </div>
     </div>
 
@@ -521,10 +521,10 @@
     <div id="nameModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeName()">&times;</span>
-            <h2>💬 Sohbete Katıl</h2>
-            <p>Sohbette kullanmak istediğiniz isim?</p>
+            <h2>💬 Çalışmaya Katıl</h2>
+            <p>Çalışırken kullanmak istediğiniz isim?</p>
             <input type="text" id="usernameInput" class="name-input" placeholder="İsminizi girin..." maxlength="20">
-            <button class="modal-btn" onclick="joinChat()">Sohbete Katıl</button>
+            <button class="modal-btn" onclick="joinChat()">Çalışmaya Katıl</button>
         </div>
     </div>
 
@@ -532,12 +532,12 @@
     <div id="chatModal" class="modal">
         <div class="chat-container">
             <div class="chat-header">
-                <h2>💬 Sohbet Odası</h2>
+                <h2>💬 Çalışma Odası</h2>
                 <span class="close" onclick="closeChat()">&times;</span>
             </div>
             <div class="chat-messages" id="chatMessages">
                 <div class="chat-message">
-                    <span class="chat-username">Sistem:</span> Sohbet odasına hoş geldiniz! 🎉
+                    <span class="chat-username">Sistem:</span> Çalışma odasına hoş geldiniz! 🎉
                 </div>
             </div>
             <div class="chat-input-container">
@@ -641,7 +641,7 @@
             document.getElementById('chatModal').style.display = 'block';
             
             // Katılım mesajı ekle
-            addMessage('Sistem', `${username} sohbete katıldı! 👋`);
+            addMessage('Sistem', `${username} Çalışmaya katıldı! 👋`);
             loadMessages();
             usernameInput.value = '';
         }
